@@ -6,10 +6,10 @@ import { readFileSync } from 'node:fs'
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
 
 // GitHub Pages serves the app from /<repo>/. Override with BASE=/ for other hosts.
-const base = process.env.BASE ?? '/essens-planer/'
+const base = process.env.BASE ?? '/Essens_Planer/'
 
-export default defineConfig(({ command }) => ({
-  base: command === 'build' ? base : '/',
+export default defineConfig({
+  base,
   define: {
     'import.meta.env.APP_VERSION': JSON.stringify(pkg.version),
   },
@@ -43,4 +43,4 @@ export default defineConfig(({ command }) => ({
   test: {
     environment: 'node',
   },
-}))
+})

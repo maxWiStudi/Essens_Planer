@@ -83,7 +83,7 @@ export default {
       })}
       <div class="-mt-3 mb-5 flex flex-wrap gap-1.5">
         ${recipeChips(recipe)}
-        <span class="chip mt-1.5">${DIET_LABEL[recipe.diet]}</span>
+        ${recipe.diet === 'omni' || recipe.diet === 'pescetarisch' ? html`<span class="chip mt-1.5">${DIET_LABEL[recipe.diet]}</span>` : ''}
         ${recipe.base !== 'keins' ? html`<span class="chip mt-1.5">${BASE_LABEL[recipe.base]}</span>` : ''}
         <span class="chip mt-1.5">${recipe.vegPortions} Gemüse-Portion${recipe.vegPortions === 1 ? '' : 'en'}</span>
       </div>
