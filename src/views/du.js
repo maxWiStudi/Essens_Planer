@@ -3,7 +3,7 @@ import { state } from '../store.js'
 import { pageHeader } from '../ui/components.js'
 import { icon } from '../ui/icons.js'
 import {
-  dietSection, excludeSection, mealsSection, householdSection, varietySection, kitchenSection,
+  dietSection, excludeSection, mealsSection, householdSection, varietySection, kitchenSection, prepSection,
   settingsActions, settingsInputs,
 } from '../ui/settings-forms.js'
 
@@ -23,6 +23,7 @@ export default {
           ${icon('right', 'size-4 text-muted')}
         </a>
         ${card(mealsSection(s))}
+        ${card(prepSection(s))}
         ${card(dietSection(s))}
         ${card(excludeSection(s))}
         ${card(householdSection(s))}

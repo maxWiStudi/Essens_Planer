@@ -21,6 +21,10 @@ export function defaultSettings() {
       meatMax: 3,
       vegPerMainMin: 1,
     },
+    // Cook once, eat more than once.
+    // mode 'frisch': every meal cooked fresh · 'reste': dinner cooked double, the
+    // rest is lunch the next day · 'mealprep': one dish covers several meals of one kind.
+    prep: { mode: 'frisch', leftoverMax: 3, meal: 'mittag', batchSize: 2 },
     sync: { enabled: false, owner: '', repo: '', path: 'essensplan.json', branch: 'main' },
     onboarded: false,
     updatedAt: new Date(0).toISOString(),
@@ -37,6 +41,7 @@ export function withDefaults(settings) {
     meals: { ...d.meals, ...settings.meals },
     maxMinutes: { ...d.maxMinutes, ...settings.maxMinutes },
     variety: { ...d.variety, ...settings.variety },
+    prep: { ...d.prep, ...settings.prep },
     sync: { ...d.sync, ...settings.sync },
   }
 }

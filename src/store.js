@@ -111,6 +111,41 @@ export async function updateSlot(startDate, key, patch) {
   return storeWeek(next)
 }
 
+/** Replace all slots of a week (used for undo). */
+export async function updateWeekSlots(startDate, slots) {
+  const week = state.weeks.get(startDate)
+  if (week) return storeWeek({ ...week, slots })
+}
+
+/**
+ * Put another dish into a slot. A dish with leftovers takes its leftovers along;
+ * a leftover slot that gets its own dish is cooked fresh from then on.
+ */
+export async function swapSlot(startDate, key, recipeId) {
+  const week = state.weeks.get(startDate)
+  if (!week) return
+  const slots = week.slots.map((s) => {
+    if (slotKey(s) === key) return { ...s, recipeId, leftoverOf: null, status: 'geplant' }
+    if (s.leftoverOf === key) return { ...s, recipeId }
+    return s
+  })
+  return storeWeek({ ...week, slots })
+}
+
+/** Toggle "eaten out". Without the cooked dish there are no leftovers: they become fresh meals. */
+export async function toggleAway(startDate, key) {
+  const week = state.weeks.get(startDate)
+  if (!week) return
+  const slot = week.slots.find((s) => slotKey(s) === key)
+  const away = slot.status !== 'auswaerts'
+  const slots = week.slots.map((s) => {
+    if (slotKey(s) === key) return { ...s, status: away ? 'auswaerts' : 'geplant' }
+    if (away && s.leftoverOf === key) return { ...s, leftoverOf: null }
+    return s
+  })
+  return storeWeek({ ...week, slots })
+}
+
 export async function deleteWeek(startDate) {
   state.weeks.delete(startDate)
   await db.deleteWeek(startDate)

@@ -139,6 +139,37 @@ export function kitchenSection(s) {
     </fieldset>`
 }
 
+export function prepSection(s) {
+  const p = s.prep
+  const modes = [
+    ['frisch', 'Jede Mahlzeit frisch', 'Jedes Gericht wird nur einmal gegessen.'],
+    ['reste', 'Reste vom Vorabend', 'Abends doppelt kochen, am nächsten Tag gibt es den Rest zu Mittag.'],
+    ['mealprep', 'Meal Prep', 'Ein Gericht vorkochen, das für mehrere Mahlzeiten reicht.'],
+  ]
+  return html`
+    <fieldset>
+      <legend class="h2 mb-1">Vorkochen</legend>
+      <p class="mb-3 text-sm text-muted">Spart Zeit unter der Woche. Dafür kommen nur Gerichte infrage, die sich gut aufwärmen oder kalt halten.</p>
+      <div class="grid gap-2">
+        ${modes.map(([m, label, text]) => html`
+          <button type="button" class="toggle text-left" aria-pressed="${p.mode === m}" data-action="prep-mode" data-value="${m}">
+            <span class="block font-semibold">${label}</span>
+            <span class="block text-xs font-normal text-muted">${text}</span>
+          </button>`)}
+      </div>
+      ${p.mode === 'reste' ? html`
+        <div class="mt-4 max-w-xs">
+          ${numSelect('leftoverMax', 'Reste-Mittagessen pro Woche', p.leftoverMax, [[1, 'bis zu 1×'], [2, 'bis zu 2×'], [3, 'bis zu 3×'], [4, 'bis zu 4×'], [5, 'bis zu 5×'], [6, 'so oft es geht']], 'prep-leftoverMax')}
+          <p class="mt-1 text-xs text-muted">Braucht ein Abendessen und am Folgetag ein Mittagessen im Plan.</p>
+        </div>` : ''}
+      ${p.mode === 'mealprep' ? html`
+        <div class="mt-4 grid grid-cols-2 gap-3">
+          ${numSelect('prepMeal', 'Für welche Mahlzeit?', p.meal, MEALS.map((m) => [m, MEAL_LABEL[m]]), 'prep-meal')}
+          ${numSelect('batchSize', 'Ein Gericht reicht für', p.batchSize, [[2, '2 Mahlzeiten'], [3, '3 Mahlzeiten'], [4, '4 Mahlzeiten']], 'prep-batchSize')}
+        </div>` : ''}
+    </fieldset>`
+}
+
 const toggleIn = (arr, v) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v])
 const week = (f) => Array.from({ length: 7 }, (_, i) => f(i))
 const MEAL_PRESETS = {
@@ -158,6 +189,7 @@ export const settingsActions = {
     row[day] = !row[day]
     return saveSettings({ meals: { ...state.settings.meals, [meal]: row } })
   },
+  'prep-mode': (el) => saveSettings({ prep: { ...state.settings.prep, mode: el.dataset.value } }),
   'meals-preset': (el) => saveSettings({ meals: MEAL_PRESETS[el.dataset.value]() }),
   'add-person': () =>
     saveSettings({ household: [...state.settings.household, { name: `Person ${state.settings.household.length + 1}`, factor: 1 }] }),
@@ -178,6 +210,9 @@ export const settingsInputs = {
 for (const key of ['cooldownDays', 'meatMax', 'fishMin', 'fishMax', 'legumesMin']) {
   settingsInputs[`variety-${key}`] = (el) => saveSettings({ variety: { ...state.settings.variety, [key]: Number(el.value) } })
 }
+settingsInputs['prep-leftoverMax'] = (el) => saveSettings({ prep: { ...state.settings.prep, leftoverMax: Number(el.value) } })
+settingsInputs['prep-meal'] = (el) => saveSettings({ prep: { ...state.settings.prep, meal: el.value } })
+settingsInputs['prep-batchSize'] = (el) => saveSettings({ prep: { ...state.settings.prep, batchSize: Number(el.value) } })
 for (const m of MEALS) {
   settingsInputs[`maxMinutes-${m}`] = (el) => saveSettings({ maxMinutes: { ...state.settings.maxMinutes, [m]: Number(el.value) } })
 }

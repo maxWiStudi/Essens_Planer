@@ -39,7 +39,7 @@ function statusBadge(slot) {
 }
 
 /** One planned meal. href opens the recipe; the round button marks it eaten. */
-export function mealRow(slot, recipe, { href, showMeal = true, controls = '' }) {
+export function mealRow(slot, recipe, { href, showMeal = true, controls = '', note = '' }) {
   const done = slot.status === 'erledigt'
   if (!recipe) {
     return html`<div class="card p-4 text-sm text-muted">${MEAL_LABEL[slot.meal]}: kein passendes Rezept – bitte Einstellungen prüfen.</div>`
@@ -56,7 +56,7 @@ export function mealRow(slot, recipe, { href, showMeal = true, controls = '' }) 
       <a href="${href}" class="min-w-0 flex-1 rounded-lg">
         ${showMeal ? html`<span class="text-xs font-semibold uppercase tracking-wide text-primary">${MEAL_LABEL[slot.meal]}</span>` : ''}
         <span class="block font-semibold leading-snug ${away ? 'text-muted line-through' : ''}">${recipe.title}</span>
-        <span class="flex flex-wrap items-center gap-1.5">${recipeChips(recipe)}${statusBadge(slot)}</span>
+        <span class="flex flex-wrap items-center gap-1.5">${recipeChips(recipe)}${note}${statusBadge(slot)}</span>
       </a>
       ${controls}
     </div>`

@@ -1,4 +1,4 @@
-import { DIETS } from '../vocab.js'
+import { DIETS, SEAFOOD } from '../vocab.js'
 
 const dietRank = (d) => DIETS.indexOf(d)
 
@@ -37,4 +37,12 @@ export function buildHistory(weeks, exceptStartDate) {
     }
   }
   return history
+}
+
+const BATCH_STYLES = new Set(['eintopf', 'suppe', 'auflauf', 'bowl', 'ofen'])
+
+/** Can this dish be cooked once and eaten again later (reheated or from the fridge)? */
+export function canBatch(recipe) {
+  if (recipe.leftoverFriendly) return true
+  return BATCH_STYLES.has(recipe.style) && !SEAFOOD.has(recipe.protein)
 }

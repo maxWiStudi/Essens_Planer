@@ -2,12 +2,12 @@ import { html } from '../lib/html.js'
 import { state, saveSettings, ensureWeek, currentWeekStart, replanWeek } from '../store.js'
 import { go } from '../router.js'
 import {
-  dietSection, excludeSection, mealsSection, householdSection, varietySection, kitchenSection,
+  dietSection, excludeSection, mealsSection, householdSection, varietySection, kitchenSection, prepSection,
   settingsActions, settingsInputs,
 } from '../ui/settings-forms.js'
 
 // S02: setup in a few short steps. Every answer is saved right away.
-const STEPS = [dietSection, excludeSection, mealsSection, householdSection, kitchenSection, varietySection]
+const STEPS = [dietSection, excludeSection, mealsSection, householdSection, prepSection, kitchenSection, varietySection]
 
 export default {
   title: 'Einrichtung',

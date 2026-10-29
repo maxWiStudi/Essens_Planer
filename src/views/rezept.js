@@ -1,11 +1,11 @@
 import { html } from '../lib/html.js'
-import { state, updateSlot, toggleFavorite, setExcluded, currentWeekStart, ensureWeek } from '../store.js'
-import { formatDay } from '../lib/dates.js'
+import { state, updateSlot, toggleFavorite, setExcluded, currentWeekStart, ensureWeek, toggleAway } from '../store.js'
+import { formatDay, WEEKDAYS_SHORT, weekdayIndex } from '../lib/dates.js'
 import { pageHeader, recipeChips, emptyState } from '../ui/components.js'
 import { icon } from '../ui/icons.js'
 import { toast } from '../ui/toast.js'
 import { openSheet, closeSheet } from '../ui/sheet.js'
-import { findSlot, openSwapSheet, slotActions } from './shared.js'
+import { findSlot, openSwapSheet, slotActions, prepInfo, slotHref } from './shared.js'
 import { slotKey } from '../planner/generate.js'
 import { portionsOf } from '../defaults.js'
 import { formatAmount } from '../shopping/list.js'
@@ -25,22 +25,46 @@ function ingredientList(recipe, portions) {
     </ul>`
 }
 
-function slotPanel(slot) {
+const shortSlot = (s) => `${WEEKDAYS_SHORT[weekdayIndex(s.date)]}. ${MEAL_LABEL[s.meal]}`
+
+function prepBanner({ parent, children }) {
+  if (parent) {
+    return html`
+      <div class="mt-3 rounded-xl bg-primary-soft px-3 py-2 text-sm">
+        <strong>Reste</strong> vom ${MEAL_LABEL[parent.meal]} am ${formatDay(parent.date)} – nur aufwärmen bzw. aus dem Kühlschrank nehmen.
+        <a href="${slotHref(parent)}" class="mt-1 block font-semibold text-primary underline">Zum Kochtag</a>
+      </div>`
+  }
+  if (children.length) {
+    return html`
+      <div class="mt-3 rounded-xl bg-primary-soft px-3 py-2 text-sm">
+        <strong>Gleich mehr kochen:</strong> reicht auch für ${children.map(shortSlot).join(', ')}.
+        Die Mengen unten sind schon hochgerechnet. Reste abgedeckt in den Kühlschrank.
+      </div>`
+  }
+  return ''
+}
+
+function slotPanel(slot, info) {
   const away = slot.status === 'auswaerts'
   const done = slot.status === 'erledigt'
+  const isRest = !!info.parent
   return html`
     <section class="card mb-6 p-4" aria-label="Im Plan">
       <p class="text-sm text-muted">${MEAL_LABEL[slot.meal]} am ${formatDay(slot.date)}${slot.locked ? ' · fixiert' : ''}</p>
+      ${prepBanner(info)}
       <div class="mt-3 grid grid-cols-2 gap-2">
         <button type="button" class="btn-primary" data-action="toggle-done" data-date="${slot.date}" data-meal="${slot.meal}" ${away ? 'disabled' : ''}>
           ${icon('check', 'size-4')} ${done ? 'Doch nicht gegessen' : 'Gegessen'}
         </button>
         <button type="button" class="btn-secondary" data-action="swap" data-date="${slot.date}" data-meal="${slot.meal}" ${done ? 'disabled' : ''}>
-          ${icon('swap', 'size-4')} Tauschen
+          ${icon('swap', 'size-4')} ${isRest ? 'Frisch kochen' : 'Tauschen'}
         </button>
-        <button type="button" class="btn-secondary" data-action="toggle-lock" data-date="${slot.date}" data-meal="${slot.meal}" aria-pressed="${slot.locked}">
-          ${icon(slot.locked ? 'lock' : 'unlock', 'size-4')} ${slot.locked ? 'Fixiert' : 'Fixieren'}
-        </button>
+        ${isRest
+          ? html`<a class="btn-secondary" href="${slotHref(info.parent)}">${icon('left', 'size-4')} Kochtag</a>`
+          : html`<button type="button" class="btn-secondary" data-action="toggle-lock" data-date="${slot.date}" data-meal="${slot.meal}" aria-pressed="${slot.locked}">
+              ${icon(slot.locked ? 'lock' : 'unlock', 'size-4')} ${slot.locked ? 'Fixiert' : 'Fixieren'}
+            </button>`}
         <button type="button" class="btn-secondary" data-action="away" data-date="${slot.date}" data-meal="${slot.meal}" ${done ? 'disabled' : ''}>
           ${icon('out', 'size-4')} ${away ? 'Doch zu Hause' : 'Auswärts essen'}
         </button>
@@ -69,7 +93,10 @@ export default {
         ${emptyState({ title: 'Nicht gefunden', text: 'Dieses Rezept oder diese Mahlzeit gibt es nicht (mehr).' })}`
     }
     const stat = state.stats[recipe.id] ?? {}
-    const portions = portionsOf(state.settings) * (ctx.slot?.factor ?? 1)
+    const info = prepInfo(ctx.week, ctx.slot)
+    // The cooking slot makes enough for its leftovers too.
+    const cookFactor = (ctx.slot?.factor ?? 1) + info.children.reduce((n, c) => n + (c.factor ?? 1), 0)
+    const portions = portionsOf(state.settings) * cookFactor
     const back = fromPlan ? `#/woche?start=${ctx.week.startDate}` : '#/rezepte'
 
     return html`
@@ -88,12 +115,13 @@ export default {
         <span class="chip mt-1.5">${recipe.vegPortions} Gemüse-Portion${recipe.vegPortions === 1 ? '' : 'en'}</span>
       </div>
 
-      ${ctx.slot ? slotPanel(ctx.slot) : html`
+      ${ctx.slot ? slotPanel(ctx.slot, info) : html`
         <div class="mb-6"><button type="button" class="btn-secondary" data-action="add-to-plan" data-id="${recipe.id}">${icon('plus', 'size-4')} In den Plan setzen</button></div>`}
 
+      ${info.parent ? html`<details class="mb-8"><summary class="h2 cursor-pointer">Rezept anzeigen</summary><div class="mt-4">` : ''}
       <section class="mb-6" aria-labelledby="zutaten-h">
         <h2 id="zutaten-h" class="h2 mb-1">Zutaten</h2>
-        <p class="mb-2 text-sm text-muted">Für ${fmtPortions(portions)} Portion${portions === 1 ? '' : 'en'}</p>
+        <p class="mb-2 text-sm text-muted">Für ${fmtPortions(portions)} Portion${portions === 1 ? '' : 'en'}${info.children.length ? ' – inklusive Reste' : ''}</p>
         ${ingredientList(recipe, portions)}
       </section>
 
@@ -107,6 +135,7 @@ export default {
             </li>`)}
         </ol>
       </section>
+      ${info.parent ? html`</div></details>` : ''}
 
       <div class="border-t border-line pt-4">
         ${stat.excluded
@@ -134,8 +163,10 @@ export default {
     },
     away: async (el) => {
       const { week, slot } = findSlot(el.dataset.date, el.dataset.meal)
-      await updateSlot(week.startDate, slotKey(slot), { status: slot.status === 'auswaerts' ? 'geplant' : 'auswaerts' })
-      toast(slot.status === 'auswaerts' ? 'Wieder eingeplant' : 'Auswärts – fällt aus der Einkaufsliste')
+      const hadRests = prepInfo(week, slot).children.length > 0
+      await toggleAway(week.startDate, slotKey(slot))
+      if (slot.status === 'auswaerts') toast('Wieder eingeplant')
+      else toast(hadRests ? 'Auswärts – die Reste-Mahlzeiten werden jetzt frisch gekocht' : 'Auswärts – fällt aus der Einkaufsliste')
     },
     factor: async (el) => {
       const { week, slot } = findSlot(el.dataset.date, el.dataset.meal)

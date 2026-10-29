@@ -1,13 +1,31 @@
 import { html } from '../lib/html.js'
-import { state, updateSlot, getWeek, currentWeekStart } from '../store.js'
-import { weekStartOf } from '../lib/dates.js'
-import { swapOptions, slotKey } from '../planner/generate.js'
+import { state, updateSlot, swapSlot, updateWeekSlots, getWeek, currentWeekStart } from '../store.js'
+import { weekStartOf, fromISO, WEEKDAYS_SHORT, weekdayIndex } from '../lib/dates.js'
+import { swapOptions, slotKey, childrenOf } from '../planner/generate.js'
+import { icon } from '../ui/icons.js'
 import { openSheet, closeSheet } from '../ui/sheet.js'
 import { toast } from '../ui/toast.js'
 import { recipeChips } from '../ui/components.js'
 import { MEAL_LABEL } from '../vocab.js'
 
 export const slotHref = (slot) => `#/woche/${slot.date}/${slot.meal}`
+
+const dayShort = (iso) => WEEKDAYS_SHORT[weekdayIndex(iso)]
+
+/** Leftover / meal-prep relations of a slot. */
+export function prepInfo(week, slot) {
+  if (!week || !slot) return { parent: null, children: [] }
+  const parent = slot.leftoverOf ? week.slots.find((s) => slotKey(s) === slot.leftoverOf) ?? null : null
+  return { parent, children: childrenOf(week.slots, slot) }
+}
+
+/** Small chip for lists: "Rest von Mo." or "für 3 Mahlzeiten kochen". */
+export function prepNote(week, slot) {
+  const { parent, children } = prepInfo(week, slot)
+  if (parent) return html`<span class="chip mt-1.5 bg-primary-soft text-primary">${icon('refresh', 'size-3.5')} Rest von ${dayShort(parent.date)}. ${MEAL_LABEL[parent.meal]}</span>`
+  if (children.length) return html`<span class="chip mt-1.5 bg-primary-soft text-primary">${icon('plus', 'size-3.5')} für ${children.length + 1} Mahlzeiten kochen</span>`
+  return ''
+}
 
 export function findSlot(date, meal) {
   const week = getWeek(weekStartOf(date, state.settings.weekStart))
@@ -45,11 +63,17 @@ export function openSwapSheet(date, meal) {
     weeks: [...state.weeks.values()], statsById: state.stats,
   })
   const before = slot.recipeId
+  const { parent, children } = prepInfo(week, slot)
+  const intro = parent
+    ? 'Statt der Reste etwas frisch kochen – die besten Alternativen:'
+    : children.length
+      ? `Die Reste (${children.length}×) wechseln mit. Nur Gerichte, die sich zum Vorkochen eignen:`
+      : 'Die besten Alternativen für diesen Tag – nach Abwechslung und Ausgewogenheit sortiert.'
   openSheet({
     title: `${MEAL_LABEL[meal]} tauschen`,
     body: options.length
       ? html`
-        <p class="mb-3 text-sm text-muted">Die besten Alternativen für diesen Tag – nach Abwechslung und Ausgewogenheit sortiert.</p>
+        <p class="mb-3 text-sm text-muted">${intro}</p>
         <ul class="space-y-2">
           ${options.map((o) => html`
             <li>
@@ -64,10 +88,11 @@ export function openSwapSheet(date, meal) {
     actions: {
       pick: async (btn) => {
         closeSheet()
-        await updateSlot(week.startDate, slotKey(slot), { recipeId: btn.dataset.id, status: 'geplant' })
+        const snapshot = week.slots
+        await swapSlot(week.startDate, slotKey(slot), btn.dataset.id)
         toast('Getauscht', {
           label: 'Rückgängig',
-          run: () => updateSlot(week.startDate, slotKey(slot), { recipeId: before }),
+          run: () => updateWeekSlots(week.startDate, snapshot),
         })
       },
     },

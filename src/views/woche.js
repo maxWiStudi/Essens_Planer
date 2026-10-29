@@ -4,18 +4,18 @@ import { addDays, formatDay, formatRange, weekStartOf } from '../lib/dates.js'
 import { mealRow, emptyState, pageHeader } from '../ui/components.js'
 import { icon } from '../ui/icons.js'
 import { toast } from '../ui/toast.js'
-import { slotActions, slotHref } from './shared.js'
+import { slotActions, slotHref, prepNote } from './shared.js'
 import { go } from '../router.js'
 
 function controls(slot) {
   if (slot.status !== 'geplant' || !slot.recipeId) return ''
   return html`
     <div class="flex shrink-0 flex-col gap-1">
-      <button type="button" class="btn-ghost size-9 p-0 ${slot.locked ? 'text-primary' : 'text-muted'}" data-action="toggle-lock"
+      ${slot.leftoverOf ? '' : html`<button type="button" class="btn-ghost size-9 p-0 ${slot.locked ? 'text-primary' : 'text-muted'}" data-action="toggle-lock"
               data-date="${slot.date}" data-meal="${slot.meal}" aria-pressed="${slot.locked}"
               aria-label="${slot.locked ? 'Fixierung lösen' : 'Fixieren'}" title="${slot.locked ? 'Fixiert' : 'Fixieren'}">
         ${icon(slot.locked ? 'lock' : 'unlock', 'size-4')}
-      </button>
+      </button>`}
       <button type="button" class="btn-ghost size-9 p-0 text-muted" data-action="swap" data-date="${slot.date}" data-meal="${slot.meal}"
               aria-label="Tauschen" title="Tauschen">${icon('swap', 'size-4')}</button>
     </div>`
@@ -81,7 +81,7 @@ export default {
           return html`
             <section aria-label="${formatDay(d)}">
               <h2 class="mb-2 text-sm font-semibold text-muted">${formatDay(d)}</h2>
-              <div class="space-y-2">${slots.map((s) => mealRow(s, state.byId.get(s.recipeId), { href: slotHref(s), controls: controls(s) }))}</div>
+              <div class="space-y-2">${slots.map((s) => mealRow(s, state.byId.get(s.recipeId), { href: slotHref(s), controls: controls(s), note: prepNote(week, s) }))}</div>
             </section>`
         })}
       </div>`

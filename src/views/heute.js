@@ -3,7 +3,7 @@ import { state, ensureWeek, currentWeekStart } from '../store.js'
 import { addDays, today, formatDay, WEEKDAYS_SHORT, weekdayIndex, fromISO } from '../lib/dates.js'
 import { mealRow, emptyState } from '../ui/components.js'
 import { icon } from '../ui/icons.js'
-import { slotActions, slotHref } from './shared.js'
+import { slotActions, slotHref, prepNote } from './shared.js'
 import { MEALS, MEAL_LABEL } from '../vocab.js'
 
 function greeting() {
@@ -41,7 +41,7 @@ export default {
 
       ${nextRecipe ? html`
         <a href="${slotHref(next)}" class="mb-6 block rounded-card bg-primary p-5 text-primary-ink shadow-sm">
-          <span class="text-xs font-semibold uppercase tracking-wide opacity-80">${MEAL_LABEL[next.meal]} · ${nextRecipe.minutes} Min.</span>
+          <span class="text-xs font-semibold uppercase tracking-wide opacity-80">${MEAL_LABEL[next.meal]} · ${next.leftoverOf ? 'Reste aufwärmen' : `${nextRecipe.minutes} Min.`}</span>
           <span class="mt-1 block text-xl font-bold leading-snug">${nextRecipe.title}</span>
           <span class="mt-3 inline-flex items-center gap-1 text-sm font-semibold">Zum Rezept ${icon('right', 'size-4')}</span>
         </a>` : ''}
@@ -67,7 +67,7 @@ export default {
           ${slots.length ? html`<span class="text-sm text-muted">${done} von ${slots.length} gegessen</span>` : ''}
         </div>
         ${slots.length
-          ? html`<div class="space-y-2">${slots.map((s) => mealRow(s, state.byId.get(s.recipeId), { href: slotHref(s) }))}</div>`
+          ? html`<div class="space-y-2">${slots.map((s) => mealRow(s, state.byId.get(s.recipeId), { href: slotHref(s), note: prepNote(week, s) }))}</div>`
           : emptyState({
               title: 'An diesem Tag ist nichts geplant',
               text: 'Unter „Du“ legst du fest, an welchen Tagen welche Mahlzeit geplant wird.',

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { BUNDLED } from '../src/recipes.js'
 import { defaultSettings } from '../src/defaults.js'
 import { planWeek, swapOptions, skeleton, slotKey } from '../src/planner/generate.js'
+import { canBatch } from '../src/planner/filter.js'
 import { addDays } from '../src/lib/dates.js'
 import { MEAT, SEAFOOD } from '../src/vocab.js'
 
@@ -124,5 +125,101 @@ describe('skeleton', () => {
     const s = skeleton('2026-11-01', defaultSettings())
     expect(s[0].date).toBe('2026-11-01')
     expect(s.at(-1).date).toBe('2026-11-07')
+  })
+})
+
+describe('prep modes', () => {
+  const withPrep = (prep, tweak = (s) => s) => tweak({ ...defaultSettings(), prep: { ...defaultSettings().prep, ...prep } })
+  const keyOf = (s) => `${s.date}:${s.meal}`
+
+  it('frisch: no leftovers at all', () => {
+    expect(plan().slots.filter((s) => s.leftoverOf)).toHaveLength(0)
+  })
+
+  it('reste: dinner is cooked for the next lunch, at most leftoverMax times, weekdays first', () => {
+    const week = plan({ settings: withPrep({ mode: 'reste', leftoverMax: 3 }) })
+    const kids = week.slots.filter((s) => s.leftoverOf)
+    expect(kids).toHaveLength(3)
+    for (const k of kids) {
+      const parent = week.slots.find((s) => keyOf(s) === k.leftoverOf)
+      expect(parent.meal).toBe('abend')
+      expect(k.meal).toBe('mittag')
+      expect(k.date).toBe(addDays(parent.date, 1))
+      expect(k.recipeId).toBe(parent.recipeId)
+      expect(canBatch(byId.get(k.recipeId))).toBe(true)
+    }
+    // Mon-Sun week: the first three Tue–Fri lunches are weekdays.
+    for (const k of kids) expect(new Date(k.date).getDay()).not.toBe(0)
+  })
+
+  it('reste: no dish is cooked twice and the summary says how often you cook', () => {
+    const week = plan({ settings: withPrep({ mode: 'reste', leftoverMax: 5 }) })
+    const cooked = week.slots.filter((s) => !s.leftoverOf).map((s) => s.recipeId)
+    expect(new Set(cooked).size).toBe(cooked.length)
+    expect(week.explain.met.some((m) => /kochen für 21 Mahlzeiten/.test(m))).toBe(true)
+  })
+
+  it('mealprep: lunches come in batches of the chosen size from one dish', () => {
+    const week = plan({ settings: withPrep({ mode: 'mealprep', meal: 'mittag', batchSize: 3 }) })
+    const lunches = week.slots.filter((s) => s.meal === 'mittag')
+    const cookedLunches = lunches.filter((s) => !s.leftoverOf)
+    expect(cookedLunches).toHaveLength(3) // 7 lunches → 3 + 3 + 1
+    for (const c of cookedLunches) {
+      const kids = lunches.filter((s) => s.leftoverOf === keyOf(c))
+      for (const k of kids) expect(k.recipeId).toBe(c.recipeId)
+    }
+    expect(new Set(cookedLunches.map((s) => s.recipeId)).size).toBe(3)
+    // Dinners stay fresh.
+    expect(week.slots.filter((s) => s.meal === 'abend' && s.leftoverOf)).toHaveLength(0)
+  })
+
+  it('mealprep for breakfast uses dishes that keep (overnight oats & co.)', () => {
+    const week = plan({ settings: withPrep({ mode: 'mealprep', meal: 'fruehstueck', batchSize: 2 }) })
+    for (const s of week.slots.filter((x) => x.meal === 'fruehstueck' && x.leftoverOf)) expect(canBatch(byId.get(s.recipeId))).toBe(true)
+  })
+
+  it('falls back to fresh cooking when nothing suitable can be batched', () => {
+    const settings = withPrep({ mode: 'mealprep', meal: 'fruehstueck', batchSize: 2 }, (s) => ({ ...s, allergens: ['gluten', 'laktose'], excludedIngredients: ['chia', 'quinoa', 'hirse'] }))
+    const week = plan({ settings })
+    expect(week.slots.filter((s) => s.leftoverOf)).toHaveLength(0)
+    expect(week.explain.relaxed.join(' ')).toMatch(/Vorkochen/)
+  })
+
+  it('re-planning keeps a locked dish together with its leftovers', () => {
+    const settings = withPrep({ mode: 'reste', leftoverMax: 2 })
+    const w1 = plan({ settings, seed: 4 })
+    const kid = w1.slots.find((s) => s.leftoverOf)
+    const parentIdx = w1.slots.findIndex((s) => keyOf(s) === kid.leftoverOf)
+    w1.slots[parentIdx] = { ...w1.slots[parentIdx], locked: true }
+    const again = plan({ settings, previous: w1, seed: 77 })
+    const kid2 = again.slots.find((s) => keyOf(s) === keyOf(kid))
+    expect(kid2.leftoverOf).toBe(kid.leftoverOf)
+    expect(kid2.recipeId).toBe(w1.slots[parentIdx].recipeId)
+  })
+
+  it('an eaten leftover whose dish gets re-planned becomes a meal of its own', () => {
+    const settings = withPrep({ mode: 'reste', leftoverMax: 1 })
+    const w1 = plan({ settings, seed: 8 })
+    const kidIdx = w1.slots.findIndex((s) => s.leftoverOf)
+    w1.slots[kidIdx] = { ...w1.slots[kidIdx], status: 'erledigt' }
+    const again = plan({ settings, previous: w1, seed: 9 })
+    const kid = again.slots.find((s) => keyOf(s) === keyOf(w1.slots[kidIdx]))
+    expect(kid.leftoverOf).toBeNull()
+    expect(kid.recipeId).toBe(w1.slots[kidIdx].recipeId)
+  })
+
+  it('swap options for a dish with leftovers only offer dishes that keep', () => {
+    const settings = withPrep({ mode: 'reste', leftoverMax: 3 })
+    const week = plan({ settings })
+    const parent = week.slots.find((s) => week.slots.some((k) => k.leftoverOf === keyOf(s)))
+    const opts = swapOptions({ week, key: keyOf(parent), recipes: BUNDLED, settings })
+    expect(opts.length).toBeGreaterThan(0)
+    for (const o of opts) expect(canBatch(o.recipe)).toBe(true)
+  })
+
+  it('stays fast with groups', () => {
+    const t = performance.now()
+    plan({ settings: withPrep({ mode: 'mealprep', meal: 'mittag', batchSize: 2 }), seed: 3 })
+    expect(performance.now() - t).toBeLessThan(1500)
   })
 })

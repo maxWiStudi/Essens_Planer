@@ -39,15 +39,20 @@ export function evaluate(slots, ctx) {
   const { byId, settings, history, statsById = {} } = ctx
   const v = settings.variety
   const active = ordered(slots).filter((s) => s.recipeId && s.status !== 'auswaerts' && byId.has(s.recipeId))
+  // Leftover / meal-prep slots eat a dish that was cooked in another slot. Variety
+  // is judged on what gets cooked; balance (fish, vegetables …) on what gets eaten.
+  const activeKeys = new Set(active.map((s) => `${s.date}:${s.meal}`))
+  const cooked = active.filter((s) => !s.leftoverOf || !activeKeys.has(s.leftoverOf))
   let cost = 0
 
   const stats = {
     distinct: 0, duplicates: 0, recent: 0, fish: 0, legumes: 0, meat: 0, redMeat: 0, lowVeg: 0, mains: 0,
+    cooked: cooked.length, meals: active.length,
   }
 
   // Repeats inside the week.
   const counts = new Map()
-  for (const s of active) counts.set(s.recipeId, (counts.get(s.recipeId) ?? 0) + 1)
+  for (const s of cooked) counts.set(s.recipeId, (counts.get(s.recipeId) ?? 0) + 1)
   stats.distinct = counts.size
   for (const n of counts.values()) {
     if (n > 1) {
@@ -57,7 +62,7 @@ export function evaluate(slots, ctx) {
   }
 
   // Repeats across weeks (cooldown), and personal preferences.
-  for (const s of active) {
+  for (const s of cooked) {
     const used = history.get(s.recipeId)
     if (used?.length) {
       const nearest = Math.min(...used.map((d) => Math.abs(daysBetween(d, s.date))))
@@ -71,12 +76,11 @@ export function evaluate(slots, ctx) {
     if (st?.rating) cost += (st.rating - 3) * WEIGHTS.ratingStep
   }
 
-  // Main meals: rotation and balance.
-  const mains = active.filter((s) => MAIN_MEALS.includes(s.meal))
-  stats.mains = mains.length
+  // Main meals: rotation between the dishes that get cooked …
+  const cookedMains = cooked.filter((s) => MAIN_MEALS.includes(s.meal))
   const styleCount = new Map(), cuisineCount = new Map(), baseCount = new Map()
   let prev = null
-  for (const s of mains) {
+  for (const s of cookedMains) {
     const r = byId.get(s.recipeId)
     if (prev) {
       const p = byId.get(prev.recipeId)
@@ -88,6 +92,20 @@ export function evaluate(slots, ctx) {
     styleCount.set(r.style, (styleCount.get(r.style) ?? 0) + 1)
     cuisineCount.set(r.cuisine, (cuisineCount.get(r.cuisine) ?? 0) + 1)
     if (r.base !== 'keins') baseCount.set(r.base, (baseCount.get(r.base) ?? 0) + 1)
+    prev = s
+  }
+  // Allow more of one style/cuisine when there are many mains in the week.
+  const styleCap = Math.max(2, Math.ceil(cookedMains.length / 5))
+  for (const n of styleCount.values()) if (n > styleCap) cost += (n - styleCap) * WEIGHTS.styleOver
+  for (const n of cuisineCount.values()) if (n > styleCap) cost += (n - styleCap) * WEIGHTS.cuisineOver
+  const baseCap = Math.max(2, Math.ceil(cookedMains.length / 4))
+  for (const n of baseCount.values()) if (n > baseCap) cost += (n - baseCap) * WEIGHTS.baseOver
+
+  // … and balance across everything that gets eaten.
+  const mains = active.filter((s) => MAIN_MEALS.includes(s.meal))
+  stats.mains = mains.length
+  for (const s of mains) {
+    const r = byId.get(s.recipeId)
     if (SEAFOOD.has(r.protein)) stats.fish++
     if (r.protein === 'huelsenfruechte') stats.legumes++
     if (MEAT.has(r.protein)) stats.meat++
@@ -96,14 +114,7 @@ export function evaluate(slots, ctx) {
       stats.lowVeg++
       cost += WEIGHTS.lowVeg
     }
-    prev = s
   }
-  // Allow more of one style/cuisine when there are many mains in the week.
-  const styleCap = Math.max(2, Math.ceil(mains.length / 5))
-  for (const n of styleCount.values()) if (n > styleCap) cost += (n - styleCap) * WEIGHTS.styleOver
-  for (const n of cuisineCount.values()) if (n > styleCap) cost += (n - styleCap) * WEIGHTS.cuisineOver
-  const baseCap = Math.max(2, Math.ceil(mains.length / 4))
-  for (const n of baseCount.values()) if (n > baseCap) cost += (n - baseCap) * WEIGHTS.baseOver
 
   // Weekly targets apply in full from 7 planned mains and shrink below that.
   const scale = Math.min(1, mains.length / 7)
@@ -120,7 +131,7 @@ export function evaluate(slots, ctx) {
   // Breakfast: mostly about not eating the same kind every day.
   const bStyle = new Map()
   let prevBreakfast = null
-  for (const s of active.filter((x) => x.meal === 'fruehstueck')) {
+  for (const s of cooked.filter((x) => x.meal === 'fruehstueck')) {
     const r = byId.get(s.recipeId)
     bStyle.set(r.style, (bStyle.get(r.style) ?? 0) + 1)
     if (prevBreakfast && r.protein !== 'keins' && r.protein === prevBreakfast.protein) cost += WEIGHTS.breakfastSameProteinInRow
