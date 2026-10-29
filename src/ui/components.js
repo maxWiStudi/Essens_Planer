@@ -1,4 +1,4 @@
-import { html } from '../lib/html.js'
+import { html, ariaBool } from '../lib/html.js'
 import { icon } from './icons.js'
 import { MEAL_LABEL, PROTEIN_LABEL, DIET_LABEL } from '../vocab.js'
 
@@ -49,7 +49,7 @@ export function mealRow(slot, recipe, { href, showMeal = true, controls = '', no
     <div class="card flex items-center gap-3 p-3 ${done ? 'opacity-75' : ''}">
       <button type="button"
               class="grid size-10 shrink-0 place-items-center rounded-full border-2 ${done ? 'border-ok bg-ok text-surface' : 'border-line text-transparent hover:text-muted'}"
-              data-action="toggle-done" data-date="${slot.date}" data-meal="${slot.meal}" aria-pressed="${done}"
+              data-action="toggle-done" data-date="${slot.date}" data-meal="${slot.meal}" aria-pressed="${ariaBool(done)}"
               aria-label="${done ? 'Nicht gegessen' : 'Gegessen'}: ${recipe.title}" ${away ? 'disabled' : ''}>
         ${icon('check')}
       </button>

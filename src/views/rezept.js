@@ -1,4 +1,4 @@
-import { html } from '../lib/html.js'
+import { html, ariaBool } from '../lib/html.js'
 import { state, updateSlot, toggleFavorite, setExcluded, currentWeekStart, ensureWeek, toggleAway } from '../store.js'
 import { formatDay, WEEKDAYS_SHORT, weekdayIndex } from '../lib/dates.js'
 import { pageHeader, recipeChips, emptyState } from '../ui/components.js'
@@ -62,7 +62,7 @@ function slotPanel(slot, info) {
         </button>
         ${isRest
           ? html`<a class="btn-secondary" href="${slotHref(info.parent)}">${icon('left', 'size-4')} Kochtag</a>`
-          : html`<button type="button" class="btn-secondary" data-action="toggle-lock" data-date="${slot.date}" data-meal="${slot.meal}" aria-pressed="${slot.locked}">
+          : html`<button type="button" class="btn-secondary" data-action="toggle-lock" data-date="${slot.date}" data-meal="${slot.meal}" aria-pressed="${ariaBool(slot.locked)}">
               ${icon(slot.locked ? 'lock' : 'unlock', 'size-4')} ${slot.locked ? 'Fixiert' : 'Fixieren'}
             </button>`}
         <button type="button" class="btn-secondary" data-action="away" data-date="${slot.date}" data-meal="${slot.meal}" ${done ? 'disabled' : ''}>
@@ -104,7 +104,7 @@ export default {
         back,
         right: html`
           <button type="button" class="btn-ghost size-11 shrink-0 p-0 ${stat.favorite ? 'text-primary' : 'text-muted'}" data-action="favorite" data-id="${recipe.id}"
-                  aria-pressed="${!!stat.favorite}" aria-label="${stat.favorite ? 'Aus Favoriten entfernen' : 'Als Favorit merken'}">
+                  aria-pressed="${ariaBool(!!stat.favorite)}" aria-label="${stat.favorite ? 'Aus Favoriten entfernen' : 'Als Favorit merken'}">
             ${icon('heart', `size-6 ${stat.favorite ? 'fill-current' : ''}`)}
           </button>`,
       })}

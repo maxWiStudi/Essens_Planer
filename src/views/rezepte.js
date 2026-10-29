@@ -1,4 +1,4 @@
-import { html } from '../lib/html.js'
+import { html, ariaBool } from '../lib/html.js'
 import { state, toggleFavorite } from '../store.js'
 import { fitsSettings } from '../planner/filter.js'
 import { pageHeader, recipeChips } from '../ui/components.js'
@@ -40,7 +40,7 @@ function results() {
                 : !fits ? html`<span class="mt-1 block text-xs text-muted">passt nicht zu deinen Einstellungen</span>` : ''}
             </a>
             <button type="button" class="btn-ghost size-10 shrink-0 p-0 ${st.favorite ? 'text-primary' : 'text-muted'}" data-action="favorite" data-id="${r.id}"
-                    aria-pressed="${!!st.favorite}" aria-label="Favorit: ${r.title}">${icon('heart', `size-5 ${st.favorite ? 'fill-current' : ''}`)}</button>
+                    aria-pressed="${ariaBool(!!st.favorite)}" aria-label="Favorit: ${r.title}">${icon('heart', `size-5 ${st.favorite ? 'fill-current' : ''}`)}</button>
           </li>`
       })}
     </ul>`
@@ -58,7 +58,7 @@ export default {
         <input id="suche" type="search" class="field pl-9" placeholder="Gericht oder Zutat suchen" value="${search}" data-input="search" data-live autocomplete="off" />
       </div>
       <div class="mb-4 flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Filter">
-        ${FILTERS.map(([v, l]) => html`<button type="button" class="toggle shrink-0" aria-pressed="${filter === v}" data-action="filter" data-value="${v}">${l}</button>`)}
+        ${FILTERS.map(([v, l]) => html`<button type="button" class="toggle shrink-0" aria-pressed="${ariaBool(filter === v)}" data-action="filter" data-value="${v}">${l}</button>`)}
       </div>
       <div id="results">${results()}</div>`
   },

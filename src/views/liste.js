@@ -1,4 +1,4 @@
-import { html } from '../lib/html.js'
+import { html, ariaBool } from '../lib/html.js'
 import { state, getWeek, ensureWeek, currentWeekStart, toggleChecked, clearChecked } from '../store.js'
 import { formatRange, weekStartOf, today } from '../lib/dates.js'
 import { buildList, listAsText } from '../shopping/list.js'
@@ -47,8 +47,8 @@ export default {
       })}
       <div class="mb-5 flex flex-wrap gap-2 text-sm">
         ${isCurrent ? html`
-          <button type="button" class="toggle" aria-pressed="${fromToday}" data-action="from-today">Nur ab heute</button>` : ''}
-        <button type="button" class="toggle" aria-pressed="${hide}" data-action="hide">Erledigte ausblenden</button>
+          <button type="button" class="toggle" aria-pressed="${ariaBool(fromToday)}" data-action="from-today">Nur ab heute</button>` : ''}
+        <button type="button" class="toggle" aria-pressed="${ariaBool(hide)}" data-action="hide">Erledigte ausblenden</button>
         <button type="button" class="btn-ghost py-2 text-muted" data-action="reset" data-start="${start}">Haken zurücksetzen</button>
       </div>
       ${total === 0

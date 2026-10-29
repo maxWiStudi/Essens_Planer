@@ -1,4 +1,4 @@
-import { html } from '../lib/html.js'
+import { html, ariaBool } from '../lib/html.js'
 import { state, getWeek, ensureWeek, replanWeek, currentWeekStart, deleteWeek } from '../store.js'
 import { addDays, formatDay, formatRange, weekStartOf } from '../lib/dates.js'
 import { mealRow, emptyState, pageHeader } from '../ui/components.js'
@@ -12,7 +12,7 @@ function controls(slot) {
   return html`
     <div class="flex shrink-0 flex-col gap-1">
       ${slot.leftoverOf ? '' : html`<button type="button" class="btn-ghost size-9 p-0 ${slot.locked ? 'text-primary' : 'text-muted'}" data-action="toggle-lock"
-              data-date="${slot.date}" data-meal="${slot.meal}" aria-pressed="${slot.locked}"
+              data-date="${slot.date}" data-meal="${slot.meal}" aria-pressed="${ariaBool(slot.locked)}"
               aria-label="${slot.locked ? 'Fixierung lösen' : 'Fixieren'}" title="${slot.locked ? 'Fixiert' : 'Fixieren'}">
         ${icon(slot.locked ? 'lock' : 'unlock', 'size-4')}
       </button>`}

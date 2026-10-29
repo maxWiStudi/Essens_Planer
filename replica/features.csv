@@ -1,5 +1,5 @@
 feature,area,priority,original,clone,notes
-Läuft als statische Web-App auf GitHub Pages ohne Server,plattform,must,no,partial,Nutzer-Vorgabe; Original ist native App; build fertig; Repo/Deploy wartet auf Nutzer
+Läuft als statische Web-App auf GitHub Pages ohne Server,plattform,must,no,yes,live auf GitHub Pages
 PWA mit Manifest und Service Worker (installierbar; offline),plattform,must,no,yes,relative Pfade wegen GitHub-Pages-Unterpfad
 Alle Nutzerdaten lokal (IndexedDB) inkl. Verlauf,plattform,must,no,yes,navigator.storage.persist() anfragen
 Onboarding-Quiz: Ziel; Körperdaten; Aktivität,onboarding,could,yes,no,ohne Nährwertziele kaum nötig; Onboarding = Ernährungsweise; Ausschlüsse; Haushalt
@@ -11,7 +11,7 @@ Automatische Wochenplan-Erstellung (Frühstück; Mittag; Abend × 7),plan,must,y
 Tagesziele je Tag prüfen (Eiweiß-Minimum; kcal-Band),plan,could,yes,no,ersetzt durch Ausgewogenheits-Regeln (Lebensmittelgruppen)
 Abwechslung: Wiederholungs-Sperre innerhalb der Woche und über Wochen (Historie),plan,must,no,yes,Nutzer-Kernwunsch; Original wiederholt bewusst
 Ausgewogenheit: Proteinquellen rotieren; Gemüse/Ballaststoffe pro Tag; Fisch/rotes Fleisch steuern,plan,must,no,yes,Nutzer-Kernwunsch
-Wiederholungsgrad einstellbar (keine / wenig / Meal Prep),plan,should,yes,yes,Original fragt das im Quiz
+Wiederholungsgrad einstellbar (keine / wenig / Meal Prep),plan,should,yes,yes,frisch / Reste vom Vorabend / Meal Prep
 Hinweis wenn Plan unmachbar (welche Tage um wie viel),plan,should,yes,yes,bezogen auf Filter/Abwechslung statt kcal
 Mahlzeit tauschen mit Vorschau der Auswirkung,anpassen,must,yes,yes,S10
 Gericht dauerhaft ausschließen (Nicht für mich),anpassen,must,yes,yes,

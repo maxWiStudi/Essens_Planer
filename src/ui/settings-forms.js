@@ -1,4 +1,4 @@
-import { html } from '../lib/html.js'
+import { html, ariaBool } from '../lib/html.js'
 import {
   MEALS, MEAL_LABEL, DIETS, DIET_LABEL, ALLERGENS, ALLERGEN_LABEL, EQUIPMENT, EQUIPMENT_LABEL,
 } from '../vocab.js'
@@ -9,7 +9,7 @@ import { saveSettings, state } from '../store.js'
 // Every control saves immediately.
 
 const toggle = (pressed, action, value, label) =>
-  html`<button type="button" class="toggle" aria-pressed="${pressed}" data-action="${action}" data-value="${value}">${label}</button>`
+  html`<button type="button" class="toggle" aria-pressed="${ariaBool(pressed)}" data-action="${action}" data-value="${value}">${label}</button>`
 
 export function dietSection(s) {
   return html`
@@ -62,7 +62,7 @@ export function mealsSection(s) {
               <tr>
                 <th scope="row" class="pr-1 text-left text-xs font-medium sm:text-sm">${MEAL_LABEL[m]}</th>
                 ${s.meals[m].map((on, i) => html`
-                  <td><button type="button" class="toggle size-9 p-0 text-xs" aria-pressed="${on}" data-action="toggle-meal"
+                  <td><button type="button" class="toggle size-9 p-0 text-xs" aria-pressed="${ariaBool(on)}" data-action="toggle-meal"
                        data-meal="${m}" data-day="${i}" aria-label="${MEAL_LABEL[m]} am ${WEEKDAYS[i]}">${on ? '✓' : ''}</button></td>`)}
               </tr>`)}
           </tbody>
@@ -152,7 +152,7 @@ export function prepSection(s) {
       <p class="mb-3 text-sm text-muted">Spart Zeit unter der Woche. Dafür kommen nur Gerichte infrage, die sich gut aufwärmen oder kalt halten.</p>
       <div class="grid gap-2">
         ${modes.map(([m, label, text]) => html`
-          <button type="button" class="toggle text-left" aria-pressed="${p.mode === m}" data-action="prep-mode" data-value="${m}">
+          <button type="button" class="toggle text-left" aria-pressed="${ariaBool(p.mode === m)}" data-action="prep-mode" data-value="${m}">
             <span class="block font-semibold">${label}</span>
             <span class="block text-xs font-normal text-muted">${text}</span>
           </button>`)}

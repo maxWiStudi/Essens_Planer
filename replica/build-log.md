@@ -15,3 +15,6 @@
 | S20 Daten & Sync | 2026-10-29 | partial | Test gegen echtes privates Repo | – |
 | S21 Rezeptbuch | 2026-10-29 | done | eigene Rezepte anlegen | – |
 | Deploy | 2026-10-29 | blocked | öffentliches Repo anlegen (Nutzer) | – |
+| Prep-Modus | 2026-10-29 | done | – | Planer musste von Slots auf Koch-Gruppen umgestellt werden; Abwechslung zählt gekochte Gerichte, Ausgewogenheit gegessene Mahlzeiten |
+| Deploy | 2026-10-29 | done | – | live: https://maxwistudi.github.io/Essens_Planer/ |
+| Tests | 2026-10-29 | done | echte Geräte, echter Sync | 58 Unit/Integration, 41 E2E-Fälle × 2 Profile; 4 Bugs gefunden und behoben |

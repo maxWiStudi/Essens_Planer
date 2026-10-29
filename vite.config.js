@@ -27,7 +27,7 @@ export default defineConfig({
         scope: '.',
         display: 'standalone',
         background_color: '#f7f6f3',
-        theme_color: '#b4441c',
+        theme_color: '#a83f18',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
@@ -42,5 +42,6 @@ export default defineConfig({
   ],
   test: {
     environment: 'node',
+    include: ['tests/**/*.test.js'],
   },
 })

@@ -33,3 +33,6 @@ export function html(strings, ...values) {
 export function toString(fragment) {
   return render(fragment)
 }
+
+/** "true"/"false" for ARIA state attributes (a plain false would render as an empty string). */
+export const ariaBool = (value) => (value ? 'true' : 'false')

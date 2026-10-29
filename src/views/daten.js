@@ -136,6 +136,7 @@ export default {
       if (!file) return
       try {
         const data = JSON.parse(await file.text())
+        db.migrate(data) // reject foreign or too-new files before asking anything
         if (!confirm('Import ersetzt alle aktuellen Daten auf diesem Gerät. Fortfahren?')) return
         await db.importData(data)
         await reloadFromDb()

@@ -41,7 +41,7 @@ export default {
 
       ${nextRecipe ? html`
         <a href="${slotHref(next)}" class="mb-6 block rounded-card bg-primary p-5 text-primary-ink shadow-sm">
-          <span class="text-xs font-semibold uppercase tracking-wide opacity-80">${MEAL_LABEL[next.meal]} · ${next.leftoverOf ? 'Reste aufwärmen' : `${nextRecipe.minutes} Min.`}</span>
+          <span class="text-xs font-semibold uppercase tracking-wide">${MEAL_LABEL[next.meal]} · ${next.leftoverOf ? 'Reste aufwärmen' : `${nextRecipe.minutes} Min.`}</span>
           <span class="mt-1 block text-xl font-bold leading-snug">${nextRecipe.title}</span>
           <span class="mt-3 inline-flex items-center gap-1 text-sm font-semibold">Zum Rezept ${icon('right', 'size-4')}</span>
         </a>` : ''}
