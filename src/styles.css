@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+/* Design tokens. Components use only these names (bg-surface, text-muted, …). */
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface-2: #efede8;
+  --ink: #1d232b;
+  --muted: #5f6873;
+  --line: #e1ddd5;
+  --primary: #b4441c;
+  --primary-ink: #ffffff;
+  --primary-soft: #f8e3d9;
+  --ok: #2f7a4f;
+  --ok-soft: #dcefe3;
+  --warn: #9a6200;
+  --warn-soft: #fbedcf;
+  --focus: #1f6feb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15181c;
+    --surface: #1e2227;
+    --surface-2: #272c33;
+    --ink: #eceae6;
+    --muted: #a3abb5;
+    --line: #333a42;
+    --primary: #f0875c;
+    --primary-ink: #1d1410;
+    --primary-soft: #3c241a;
+    --ok: #7fcf9f;
+    --ok-soft: #1d3326;
+    --warn: #f1c26b;
+    --warn-soft: #3a2e14;
+    --focus: #7aa7ff;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
+  --color-primary-soft: var(--primary-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-focus: var(--focus);
+  --radius-card: 1rem;
+  --radius-pill: 999px;
+  --spacing-tabbar: 4.25rem;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-pill px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+@utility btn-primary {
+  @apply btn bg-primary text-primary-ink hover:opacity-90;
+}
+
+@utility btn-secondary {
+  @apply btn border border-line bg-surface text-ink hover:bg-surface-2;
+}
+
+@utility btn-ghost {
+  @apply btn text-ink hover:bg-surface-2;
+}
+
+@utility card {
+  @apply rounded-card border border-line bg-surface;
+}
+
+@utility chip {
+  @apply inline-flex items-center gap-1 rounded-pill bg-surface-2 px-2.5 py-1 text-xs font-medium text-muted;
+}
+
+@utility field {
+  @apply w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-base text-ink placeholder:text-muted;
+}
+
+@utility label {
+  @apply mb-1 block text-sm font-medium text-ink;
+}
+
+@utility h1 {
+  @apply text-2xl font-bold tracking-tight;
+}
+
+@utility h2 {
+  @apply text-lg font-semibold;
+}
+
+@utility toggle {
+  @apply rounded-xl border border-line bg-surface px-3 py-2 text-sm font-medium text-ink aria-pressed:border-primary aria-pressed:bg-primary-soft aria-pressed:text-ink;
+}
