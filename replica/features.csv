@@ -1,48 +1,48 @@
 feature,area,priority,original,clone,notes
-Läuft als statische Web-App auf GitHub Pages ohne Server,plattform,must,no,no,Nutzer-Vorgabe; Original ist native App
-PWA mit Manifest und Service Worker (installierbar; offline),plattform,must,no,no,relative Pfade wegen GitHub-Pages-Unterpfad
-Alle Nutzerdaten lokal (IndexedDB) inkl. Verlauf,plattform,must,no,no,navigator.storage.persist() anfragen
+Läuft als statische Web-App auf GitHub Pages ohne Server,plattform,must,no,partial,Nutzer-Vorgabe; Original ist native App; build fertig; Repo/Deploy wartet auf Nutzer
+PWA mit Manifest und Service Worker (installierbar; offline),plattform,must,no,yes,relative Pfade wegen GitHub-Pages-Unterpfad
+Alle Nutzerdaten lokal (IndexedDB) inkl. Verlauf,plattform,must,no,yes,navigator.storage.persist() anfragen
 Onboarding-Quiz: Ziel; Körperdaten; Aktivität,onboarding,could,yes,no,ohne Nährwertziele kaum nötig; Onboarding = Ernährungsweise; Ausschlüsse; Haushalt
 Ziele berechnen (Mifflin-St Jeor) mit offengelegter Formel und editierbar,onboarding,could,yes,no,Nutzer: Nährwerte nicht so wichtig
-Ernährungsweise (vegetarisch; vegan; pescetarisch) und Allergene ausschließen,onboarding,must,yes,no,Original: 12 Allergene
-Zutaten ausschließen / bevorzugen,onboarding,must,yes,no,
-Maximale Kochzeit und vorhandene Küchengeräte,onboarding,should,yes,no,
-Automatische Wochenplan-Erstellung (Frühstück; Mittag; Abend × 7),plan,must,yes,no,Original per KI auf Server; Nachbau: eigener Algorithmus im Browser
+Ernährungsweise (vegetarisch; vegan; pescetarisch) und Allergene ausschließen,onboarding,must,yes,yes,Original: 12 Allergene
+Zutaten ausschließen / bevorzugen,onboarding,must,yes,yes,
+Maximale Kochzeit und vorhandene Küchengeräte,onboarding,should,yes,yes,
+Automatische Wochenplan-Erstellung (Frühstück; Mittag; Abend × 7),plan,must,yes,yes,Original per KI auf Server; Nachbau: eigener Algorithmus im Browser
 Tagesziele je Tag prüfen (Eiweiß-Minimum; kcal-Band),plan,could,yes,no,ersetzt durch Ausgewogenheits-Regeln (Lebensmittelgruppen)
-Abwechslung: Wiederholungs-Sperre innerhalb der Woche und über Wochen (Historie),plan,must,no,no,Nutzer-Kernwunsch; Original wiederholt bewusst
-Ausgewogenheit: Proteinquellen rotieren; Gemüse/Ballaststoffe pro Tag; Fisch/rotes Fleisch steuern,plan,must,no,no,Nutzer-Kernwunsch
-Wiederholungsgrad einstellbar (keine / wenig / Meal Prep),plan,should,yes,no,Original fragt das im Quiz
-Hinweis wenn Plan unmachbar (welche Tage um wie viel),plan,should,yes,no,bezogen auf Filter/Abwechslung statt kcal
-Mahlzeit tauschen mit Vorschau der Auswirkung,anpassen,must,yes,no,S10
-Gericht dauerhaft ausschließen (Nicht für mich),anpassen,must,yes,no,
-Mahlzeit fixieren und Rest neu würfeln,anpassen,must,no,no,eigene Ergänzung für anpassbare Pläne
-Ganze Woche oder Rest der Woche neu erstellen,anpassen,must,yes,no,S12
-Gericht manuell aus Rezeptbuch in einen Slot setzen,anpassen,should,no,no,S21
-Auswärts essen markieren,anpassen,should,yes,no,ohne Foto
+Abwechslung: Wiederholungs-Sperre innerhalb der Woche und über Wochen (Historie),plan,must,no,yes,Nutzer-Kernwunsch; Original wiederholt bewusst
+Ausgewogenheit: Proteinquellen rotieren; Gemüse/Ballaststoffe pro Tag; Fisch/rotes Fleisch steuern,plan,must,no,yes,Nutzer-Kernwunsch
+Wiederholungsgrad einstellbar (keine / wenig / Meal Prep),plan,should,yes,yes,Original fragt das im Quiz
+Hinweis wenn Plan unmachbar (welche Tage um wie viel),plan,should,yes,yes,bezogen auf Filter/Abwechslung statt kcal
+Mahlzeit tauschen mit Vorschau der Auswirkung,anpassen,must,yes,yes,S10
+Gericht dauerhaft ausschließen (Nicht für mich),anpassen,must,yes,yes,
+Mahlzeit fixieren und Rest neu würfeln,anpassen,must,no,yes,eigene Ergänzung für anpassbare Pläne
+Ganze Woche oder Rest der Woche neu erstellen,anpassen,must,yes,yes,S12
+Gericht manuell aus Rezeptbuch in einen Slot setzen,anpassen,should,no,yes,S21
+Auswärts essen markieren,anpassen,should,yes,yes,ohne Foto
 Starttag der Woche wählen,anpassen,could,yes,no,
-Heute-Ansicht mit nächster Mahlzeit; Tagesstand; Wochenleiste,heute,must,yes,no,S06
-Mahlzeit als erledigt abhaken,heute,must,yes,no,
+Heute-Ansicht mit nächster Mahlzeit; Tagesstand; Wochenleiste,heute,must,yes,yes,S06
+Mahlzeit als erledigt abhaken,heute,must,yes,yes,
 Streak-Zähler,heute,could,yes,no,
-Wochenübersicht mit Tages-Summen,woche,must,yes,no,S07
-Rezept-Detail mit Zutaten in Gramm; Schritten; Makros,rezepte,must,yes,no,S08; eigene Rezepte
+Wochenübersicht mit Tages-Summen,woche,must,yes,yes,S07
+Rezept-Detail mit Zutaten in Gramm; Schritten; Makros,rezepte,must,yes,yes,S08; eigene Rezepte
 Nährwert-Rechnung Zeile für Zeile (Datenquelle),rezepte,skip,yes,no,Nutzer: Nährwerte nicht so wichtig
-Favoriten,rezepte,should,yes,no,
-Rezeptbuch durchsuchen und filtern,rezepte,should,no,no,S21
+Favoriten,rezepte,should,yes,yes,
+Rezeptbuch durchsuchen und filtern,rezepte,should,no,yes,S21
 Eigene Rezepte anlegen,rezepte,could,no,no,braucht Zutaten-Picker mit Nährwerten
-Eigene Rezeptdatenbank (mind. 25 Frühstück + 60 Mittag/Abend),inhalt,must,no,no,größter Aufwand; eigene Texte
+Eigene Rezeptdatenbank (mind. 25 Frühstück + 60 Mittag/Abend),inhalt,must,no,yes,größter Aufwand; eigene Texte
 Eigene Rezeptbilder,inhalt,could,yes,no,Original hat Fotos; Nachbau: Emoji/Illustration oder keine
-Einkaufsliste aus Plan; nach Gängen sortiert; abhaken,einkauf,must,yes,no,S13
+Einkaufsliste aus Plan; nach Gängen sortiert; abhaken,einkauf,must,yes,yes,S13
 Mengen auf Packungsgrößen runden + Haltbarkeit,einkauf,should,yes,no,
-Einkaufsliste teilen (Web Share API / Text kopieren),einkauf,should,yes,no,
-Haushalt: mehrere Personen mit Portionsfaktor,haushalt,should,yes,no,lokal; ohne Live-Code
+Einkaufsliste teilen (Web Share API / Text kopieren),einkauf,should,yes,yes,
+Haushalt: mehrere Personen mit Portionsfaktor,haushalt,should,yes,yes,lokal; ohne Live-Code
 Budget mit geschätzten Preisen (Verzehr vs. Kasse),einkauf,could,yes,no,v1 bewusst weggelassen
 Einheiten g/oz und kg/lb,einstellungen,could,yes,no,für DE zuerst nur metrisch
-Quiz wiederholen (vorausgefüllt),einstellungen,should,yes,no,S15
-Backup Export/Import (JSON),daten,must,no,no,Ersatz für fehlende Sync
-Optionaler GitHub-Sync: Daten als JSON in privatem Repo (Token des Nutzers),daten,should,no,no,Nutzerwunsch; löst iOS-Datenverlust und Mehrgeräte-Sync
+Quiz wiederholen (vorausgefüllt),einstellungen,should,yes,yes,S15
+Backup Export/Import (JSON),daten,must,no,yes,Ersatz für fehlende Sync
+Optionaler GitHub-Sync: Daten als JSON in privatem Repo (Token des Nutzers),daten,should,no,partial,Nutzerwunsch; löst iOS-Datenverlust und Mehrgeräte-Sync; gebaut + Merge getestet; noch nicht gegen echtes Repo getestet
 Plan per Link teilen (im URL-Fragment),daten,could,no,no,v1 bewusst weggelassen
-Dark Mode,design,could,yes,no,
-Install-Hinweis für iOS,plattform,should,no,no,kein Install-Prompt auf iOS
+Dark Mode,design,could,yes,yes,
+Install-Hinweis für iOS,plattform,should,no,yes,kein Install-Prompt auf iOS
 Optionale Gemini-Anbindung (eigener API-Key): neue Rezepte vorschlagen / Auswahl anpassen,ki,could,yes,no,nach v1; Rezeptschema KI-tauglich anlegen
 Login und geräteübergreifende Sync,konto,skip,yes,skip,braucht Backend; Ersatz Export/Import
 Haushaltscode mit Live-Sync,haushalt,skip,yes,skip,braucht Backend
